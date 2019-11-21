@@ -1,14 +1,20 @@
-#include<stdio.h>
+﻿#include<stdio.h>
 #include<Windows.h>
-#include <conio.h>
+#include<conio.h>
 #include<math.h>
 #include<time.h>
 #include<vector>
 using namespace std;
-const int C = 30, D0 = 80;
+const int C = 30, D0 = 20;
 
 struct Message{
-	/*Структура предназначена для запроса данных змеи для методов проверок класса поле*/
+	/*Структура предназначена для запроса данных змеи 
+		для методов проверок класса поле
+		code - для кода запроса
+		x, y - для координат головы змеи 
+		vx, vy - для направления движения
+		answer - для возврата результата метода проверки из класса змеи
+	*/
 	
 	int code, x, y, vx, vy;
 	bool answer;
@@ -19,6 +25,8 @@ protected:
 	int x, y, color, id;
 public:
 	Animal(int x, int y, int color){
+		/*Конструктор класса Animal*/
+
 		this->x = x;
 		this->y = y;
 		this->color = color;
@@ -27,6 +35,7 @@ public:
 	virtual void draw(HDC hdc){
 		/*Рисование животного
 			форма животного: квадрат*/
+
 		RECT r;
 		r.left = x*C+D0;
 		r.top = y*C+D0;
@@ -48,7 +57,9 @@ public:
 	virtual int get_id(){
 		return id;
 	}
-	virtual void new_coord(int x, int y){
+	virtual void set_new_coord(int x, int y){
+		/*Метод предназначен для установления новых координат x, y*/
+
 		this->x = x;
 		this->y = y;
 	}
@@ -82,7 +93,9 @@ public:
 
 class Snake_piece: public Animal{
 	public:
-	Snake_piece(int x, int y, int color):Animal(x,y,color){}
+	Snake_piece(int x, int y, int color):Animal(x,y,color){
+		this->id = 3;  
+	}
 };
 
 class Snake{
@@ -91,6 +104,18 @@ protected:
 	vector <Snake_piece*> piece;
 public:
 	Snake(int len){
+		/*Конструктор класса Snake
+			len - длина змеи
+			vx - направление движения по оси ox
+			vy - направление движения по оси oy
+			vx =  1 vy =  0 - вправо
+			vx = -1 vy =  0 - влево
+			vx =  0 vy =  1 - вниз
+			vx =  0 vy = -1 - вверх
+			начальное направление движения - вправо
+			piece - содержит "кусочки" змеи
+		*/
+
 		this->len = len;
 		this->vx = 1;
 		this->vy = 0;
@@ -146,7 +171,8 @@ public:
 		return true;
 	}
 	void Event(Message *mes){
-		/*Метод предназначен для обработки запросов данных для методов проверок класса поля*/
+		/*Метод предназначен для обработки запросов данных 
+			для методов проверок класса поля*/
 
 		switch (mes->code){
 			case 77: mes->answer = this->check_self_eat();
@@ -170,6 +196,12 @@ protected:
 	Animal * rand_animal;
 public:
 	Field(int height, int width, int speed, int count){
+		/*Конструктор класса Field
+			 time_to_change_mang - номер итерации основного цикла игры 
+			 для смены положения мангуста
+			 message - структура для запроса данных змеи
+			 init_animals - инициализация животных
+		*/
 	this->speed = speed;
 	this->time_to_change_mang = count;
 	this->height = height;
@@ -228,13 +260,12 @@ public:
 		switch(vx){
 		case 1: if(head_x == mang_x - 1 && head_y == mang_y) return true;break;
 		case -1: if(head_x == mang_x + 1 && head_y == mang_y) return true;break;
-		case 0:
-			{
-				switch(vy){
-					case 1: if(head_x == mang_x && head_y == mang_y - 1) return true;break;
-					case -1: if(head_x == mang_x && head_y == mang_y + 1) return true;break;
-				}
-			}break;
+		case 0:			
+			switch(vy){
+				case 1: if(head_x == mang_x && head_y == mang_y - 1) return true;break;
+				case -1: if(head_x == mang_x && head_y == mang_y + 1) return true;break;
+			}
+			break;
 		}
 		return false;
 	}
@@ -279,7 +310,7 @@ public:
 		/*Метод предназначен для изменения координат животного animal*/
 
 		create_new_coord(another1, another2);
-		animal->new_coord(message.x, message.y);		
+		animal->set_new_coord(message.x, message.y);		
 	}
 	void create_new_coord(Animal * animal1, Animal * animal2){
 		/*Создание новых координат и их сохранение в message.x и message.y*/
@@ -372,7 +403,7 @@ int main()
 	HWND hconwnd = GetConsoleWindow();
 	HDC hdc = GetDC(hconwnd);
 
-	Field field(16, 18, 100, 40);
+	Field field(16, 18, 200, 40);
 	field.mainloop(hdc);
 
 	system("pause");
