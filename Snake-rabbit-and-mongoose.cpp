@@ -5,7 +5,12 @@
 #include<time.h>
 #include<vector>
 using namespace std;
-const int C = 30, D0 = 20;
+const int C = 30, D0 = 20, time_to_change_mang = 40; 
+/*
+Константы
+C - масштабирование, D0 - сдвиг от краев консоли
+time_to_change_mang - номер итерации основного цикла игры для смены положения мангуста
+*/
 
 struct Message{
 	/*Структура предназначена для запроса данных змеи 
@@ -103,7 +108,8 @@ protected:
 	int len, vx, vy;
 	vector <Snake_piece*> piece;
 public:
-	Snake(int len){
+	int speed;
+	Snake(int len, int speed){
 		/*Конструктор класса Snake
 			len - длина змеи
 			vx - направление движения по оси ox
@@ -114,11 +120,13 @@ public:
 			vx =  0 vy = -1 - вверх
 			начальное направление движения - вправо
 			piece - содержит "кусочки" змеи
+			speed - скорость змеи
 		*/
 
 		this->len = len;
 		this->vx = 1;
 		this->vy = 0;
+		this->speed = speed;
 		for (int i=0;i<len;i++){
 			piece.insert(piece.begin(), new Snake_piece(2+i,4,RGB(0,150,0)));
 		}
@@ -189,21 +197,19 @@ public:
 
 class Field{
 protected:
-	int height, width, speed, time_to_change_mang;
+	int height, width;
 	Snake * snake;
 	Mangust * mang;
 	Rabbit * rabbit;
 	Animal * rand_animal;
 public:
-	Field(int height, int width, int speed, int count){
+	Field(int height, int width){
 		/*Конструктор класса Field
 			 time_to_change_mang - номер итерации основного цикла игры 
 			 для смены положения мангуста
 			 message - структура для запроса данных змеи
 			 init_animals - инициализация животных
 		*/
-	this->speed = speed;
-	this->time_to_change_mang = count;
 	this->height = height;
 	this->width = width;
 	Message message = {0, 0, 0, 0, 0, true};
@@ -214,7 +220,7 @@ public:
 		со случайными координатами и относительно 
 		ширины и высоты игрового поля*/
 
-		snake = new Snake(4);
+		snake = new Snake(4, 200);
 		srand(time(NULL));
 		int  y1 = 3 + int(floor((height - 4 - 1)/2)), y2 =  y1 + int(floor((height - 5) / 2));
 		int mang_x = 1 + rand() % (width  - 2), rabbit_x = 1 + rand() % (width - 2);
@@ -380,7 +386,7 @@ public:
 				iter = 0;
 			}
 			
-			Sleep(speed);			
+			Sleep(snake->speed);			
 
 			if (kbhit())
 				if (getch() == 224)
@@ -403,7 +409,7 @@ int main()
 	HWND hconwnd = GetConsoleWindow();
 	HDC hdc = GetDC(hconwnd);
 
-	Field field(16, 18, 200, 40);
+	Field field(16, 18);
 	field.mainloop(hdc);
 
 	system("pause");
